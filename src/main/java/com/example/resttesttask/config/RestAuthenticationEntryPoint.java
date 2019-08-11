@@ -2,6 +2,7 @@ package com.example.resttesttask.config;
 
 import com.example.resttesttask.exception.ErrorDetails;
 import com.example.resttesttask.service.UserService;
+import com.example.resttesttask.util.LoginCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.security.core.AuthenticationException;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,8 +29,8 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         HttpServletRequest request, 
         HttpServletResponse response, 
         AuthenticationException e
-    ) throws IOException, ServletException {
-        if (userService.getLoginTriesExpired()) {
+    ) throws IOException {
+        if (LoginCache.loginTriesExpiration.get(request.getUserPrincipal().getName())) {
             ObjectMapper om = new ObjectMapper();
             ErrorDetails errorDetails = new ErrorDetails(
                 new Date(),

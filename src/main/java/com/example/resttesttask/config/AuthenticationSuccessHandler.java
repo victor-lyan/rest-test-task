@@ -35,7 +35,7 @@ public class AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccess
         HttpServletRequest request, 
         HttpServletResponse response, 
         Authentication authentication
-    ) throws IOException, ServletException {
+    ) throws IOException {
         final SavedRequest savedRequest = requestCache.getRequest(request, response);
         User principal = (User) authentication.getPrincipal();
         

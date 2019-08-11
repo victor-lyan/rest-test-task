@@ -2,6 +2,7 @@ package com.example.resttesttask.config;
 
 import com.example.resttesttask.dto.LoginRequest;
 import com.example.resttesttask.service.UserService;
+import com.example.resttesttask.util.LoginCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -37,7 +38,7 @@ public class MyAuthenticationFilter extends UsernamePasswordAuthenticationFilter
         
         // check user login tries
         if (!userService.checkLoginTries(loginRequest.getUsername())) {
-            userService.setLoginTriesExpired(true);
+            LoginCache.loginTriesExpiration.put(loginRequest.getUsername(), true);
 
             // if user is not permitted to login yet, need to make sure he can't login even with
             // right credentials
@@ -46,6 +47,8 @@ public class MyAuthenticationFilter extends UsernamePasswordAuthenticationFilter
                 ""
             );
         } else {
+            LoginCache.loginTriesExpiration.remove(loginRequest.getUsername());
+            
             authRequest = new UsernamePasswordAuthenticationToken(
                 loginRequest.getUsername(),
                 loginRequest.getPassword()

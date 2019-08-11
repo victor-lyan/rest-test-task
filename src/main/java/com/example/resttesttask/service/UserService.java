@@ -3,6 +3,7 @@ package com.example.resttesttask.service;
 import com.example.resttesttask.model.Role;
 import com.example.resttesttask.model.User;
 import com.example.resttesttask.repository.UserRepository;
+import com.example.resttesttask.util.LoginCache;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,7 +20,6 @@ public class UserService implements UserDetailsService {
 
     private UserRepository userRepository;
     private BCryptPasswordEncoder passwordEncoder;
-    private boolean loginTriesExpired = false;
 
     public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -51,10 +51,11 @@ public class UserService implements UserDetailsService {
         user.setLoginTries(0);
         user.setLastLoginTryTime(null);
         userRepository.save(user);
+        LoginCache.loginTriesExpiration.remove(user.getUsername());
     }
 
     public void updateLoginTries(String username) {
-        if (this.loginTriesExpired)
+        if (LoginCache.loginTriesExpiration.get(username))
             return;
         
         User user = userRepository.findUserByUsername(username);
@@ -84,13 +85,5 @@ public class UserService implements UserDetailsService {
         long diffInSeconds = Duration.between(lastLoginTryTime, currentTime).toMillis() / 1000;
         
         return diffInSeconds >= 3600;
-    }
-
-    public void setLoginTriesExpired(boolean b) {
-        this.loginTriesExpired = b;
-    }
-    
-    public boolean getLoginTriesExpired() {
-        return this.loginTriesExpired;
     }
 }
